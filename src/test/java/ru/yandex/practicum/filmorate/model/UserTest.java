@@ -15,7 +15,6 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
 class UserTest {
     private Validator validator;
 

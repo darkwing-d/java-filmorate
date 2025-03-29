@@ -5,6 +5,7 @@ import com.fasterxml.jackson.datatype.jsr310.ser.DurationSerializer;
 import jakarta.validation.constraints.*;
 import lombok.Builder;
 import lombok.Data;
+import ru.yandex.practicum.filmorate.annotation.ValidReleaseDate;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -17,6 +18,7 @@ public class Film {
     @NotBlank
     private String name;
 
+    @ValidReleaseDate
     private LocalDate releaseDate;
 
     @JsonSerialize(using = DurationSerializer.class)
