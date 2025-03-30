@@ -40,8 +40,8 @@ public class FilmController {
                 .build();
 
         film.setId(getNextId());
-        films.put(film.getId(), film);
-        log.info("Добавлен новый фильм: {}", film);
+        films.put(filmToAdd.getId(), filmToAdd);
+        log.info("Добавлен новый фильм: {}", filmToAdd);
         return film;
     }
 
