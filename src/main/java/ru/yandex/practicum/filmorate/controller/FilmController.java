@@ -37,7 +37,7 @@ public class FilmController {
     }
 
     //Put - обновление фильма
-    @PutMapping("/{id}")
+    @PutMapping
     public Film update(@Valid @RequestBody Film newFilm) {
         log.info("Запрос на обновление фильма с id={}", newFilm.getId());
         Film oldFilm = films.get(newFilm.getId());
