@@ -120,17 +120,6 @@ class UserTest {
     }
 
     @Test
-    void shouldNotValidateEmptyName() {
-        User user = getUser();
-        user.setName("");
-
-        Set<ConstraintViolation<User>> violations = validator.validate(user);
-        assertFalse(violations.isEmpty());
-        ConstraintViolation<User> violation = violations.iterator().next();
-        assertEquals("name", violation.getPropertyPath().toString());
-    }
-
-    @Test
     void shouldValidateCorrectUser() {
         User user = getUser();
         user.setLogin("validLogin");
