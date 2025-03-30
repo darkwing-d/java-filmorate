@@ -22,7 +22,6 @@ public class User {
     @Pattern(regexp = "^[^\\s]+$", message = "Логин не должен содержать пробелы")
     private String login;
 
-    @NotBlank(message = "Имя не может быть пустым и не должно содержать пробелы")
     private String name;
 
     @Past
