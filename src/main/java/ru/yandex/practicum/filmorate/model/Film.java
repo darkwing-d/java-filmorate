@@ -21,7 +21,7 @@ public class Film {
     @ValidReleaseDate
     private LocalDate releaseDate;
 
-    @JsonSerialize(using = DurationSerializer.class)
+    @JsonIgnore
     private Duration duration;
 
     @Size(max = 200)
@@ -34,5 +34,15 @@ public class Film {
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = Duration.ofSeconds(duration);
+    }
+
+    @JsonProperty("duration")
+    public long getDurationSeconds() {
+        return duration != null ? duration.getSeconds() : 0;
+    }
+
+    @JsonProperty("duration")
+    public void setDurationSeconds(long seconds) {
+        this.duration = Duration.ofSeconds(seconds);
     }
 }
