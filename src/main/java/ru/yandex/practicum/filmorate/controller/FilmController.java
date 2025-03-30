@@ -62,6 +62,9 @@ public class FilmController {
         }
 
         if (newFilm.getDuration() != null) {
+            if (newFilm.getDuration().isNegative()) {
+                throw new ValidationException("Продолжительность не может быть отрицательна");
+            }
             oldFilm.setDuration(newFilm.getDuration());
         }
 
