@@ -28,7 +28,7 @@ class FilmTest {
         return Film.builder()
                 .id(1L)
                 .name(name)
-                .duration(Duration.ofSeconds(100))
+                .duration(100)
                 .releaseDate(releaseDate)
                 .description(description)
                 .build();
