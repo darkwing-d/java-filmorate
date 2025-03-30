@@ -30,6 +30,15 @@ public class FilmController {
         if (film.getDuration().isNegative()) {
             throw new ValidationException("Продолжительность не может быть отрицательна");
         }
+
+        Film filmToAdd = Film.builder()
+                .id(getNextId())
+                .name(film.getName())
+                .description(film.getDescription())
+                .releaseDate(film.getReleaseDate())
+                .duration(film.getDuration())
+                .build();
+
         film.setId(getNextId());
         films.put(film.getId(), film);
         log.info("Добавлен новый фильм: {}", film);
