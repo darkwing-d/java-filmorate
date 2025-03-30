@@ -28,11 +28,11 @@ public class Film {
     private String description;
 
     @Builder
-    public Film(Long id, String name, String description, LocalDate releaseDate, Duration duration) {
+    public Film(Long id, String name, String description, LocalDate releaseDate, long duration) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
-        this.duration = duration;
+        this.duration = Duration.ofSeconds(duration);
     }
 }
