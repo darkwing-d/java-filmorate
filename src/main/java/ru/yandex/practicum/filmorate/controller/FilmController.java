@@ -76,9 +76,6 @@ public class FilmController {
         if (film.getReleaseDate() == null) {
             log.warn("Дата релиза фильма не может быть пуста: {}", film);
             throw new ValidationException("Нужно указать дату релиза фильма");
-        } else if (film.getReleaseDate().isBefore(LocalDate.of(1895, Month.DECEMBER, 28))) {
-            log.warn("Дата релиза должна быть не ранее 28.12.1895 для фильма:{}", film);
-            throw new ValidationException("Дата релиза должна быть не ранее 28.12.1895");
         }
 
         if (film.getDuration() == null) {
