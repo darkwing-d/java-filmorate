@@ -28,6 +28,10 @@ public class FilmController {
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
         film.setId(getNextId());
+
+        long durationInSeconds = film.getDuration().getSeconds();
+        film.setDurationInSeconds(durationInSeconds);
+
         films.put(film.getId(), film);
         log.info("Добавлен новый фильм: {}", film);
         return film;
