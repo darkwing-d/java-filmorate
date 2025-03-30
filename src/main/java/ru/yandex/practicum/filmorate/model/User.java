@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @Data
 public class User {
 
-    private long id;
+    private Long id;
 
     @NotBlank
     @Email(message = "Имейл должен содержать символ '@' ")
