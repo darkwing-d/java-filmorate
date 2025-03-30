@@ -27,6 +27,9 @@ public class FilmController {
     //Post - для добавления фильма
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
+        if (film.getDuration().isNegative()) {
+            throw new ValidationException("Продолжительность не может быть отрицательна");
+        }
         film.setId(getNextId());
         films.put(film.getId(), film);
         log.info("Добавлен новый фильм: {}", film);
