@@ -7,9 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
-import ru.yandex.practicum.filmorate.exception.ErrorResponse;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
@@ -50,17 +47,9 @@ public class UserController {
     }
 
     @PutMapping
-    public ResponseEntity<?> updateUser(@Valid @RequestBody User user) {
-        try {
-            User updatedUser = userService.update(user);
-            return ResponseEntity.ok(updatedUser);
-        } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ErrorResponse("Юзер не найден", e.getMessage()));
-        } catch (ValidationException e) {
-            return ResponseEntity.badRequest()
-                    .body(new ErrorResponse("Ошибка валидации", e.getMessage()));
-        }
+    public ResponseEntity<User> updateUser(@Valid @RequestBody User user) {
+        User updatedUser = userService.update(user);
+        return ResponseEntity.ok(updatedUser);
     }
 
     @PutMapping("/{id}/friends/{friendId}")
@@ -70,27 +59,17 @@ public class UserController {
     }
 
     @DeleteMapping("/{userId}/friends/{friendId}")
-    public ResponseEntity<?> removeFriend(
+    public ResponseEntity<Void> removeFriend(
             @PathVariable Long userId,
             @PathVariable Long friendId) {
-        try {
-            userService.removeFriend(userId, friendId);
-            return ResponseEntity.noContent().build();
-        } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ErrorResponse("Юзер не найден ", e.getMessage()));
-        }
+        userService.removeFriend(userId, friendId);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{userId}/friends")
-    public ResponseEntity<?> getFriends(@PathVariable Long userId) {
-        try {
-            List<User> friends = userService.getFriends(userId);
-            return ResponseEntity.ok(friends);
-        } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ErrorResponse("User not found", e.getMessage()));
-        }
+    public ResponseEntity<List<User>> getFriends(@PathVariable Long userId) {
+        List<User> friends = userService.getFriends(userId);
+        return ResponseEntity.ok(friends);
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")

@@ -52,6 +52,12 @@ public class ErrorHandler {
         return new ErrorResponse("Конфликт данных", e.getMessage());
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleIllegalArgumentException(final IllegalArgumentException e) {
+        return new ErrorResponse("Некорректный аргумент", e.getMessage());
+    }
+
     @Data
     @AllArgsConstructor
     private static class ErrorResponse {
