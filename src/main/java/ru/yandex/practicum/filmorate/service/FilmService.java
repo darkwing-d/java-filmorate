@@ -67,7 +67,7 @@ public class FilmService {
         if (film == null) {
             throw new NotFoundException("Фильм с id " + filmId + " не найден.");
         }
-        if(user == null){
+        if (user == null) {
             throw new NotFoundException("Юзер с id " + userId + " не найден.");
         }
         if (likes.containsKey(filmId)) {
