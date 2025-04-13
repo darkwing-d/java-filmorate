@@ -1,102 +1,69 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
-import jakarta.validation.ValidationException;
+import jakarta.validation.constraints.Min;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 @RestController
 @RequestMapping("/films")
 @Slf4j
 public class FilmController {
-    private final Map<Long, Film> films = new HashMap<>();
+    private final FilmService filmService;
 
-    //Get - для получения списка всех фильмов
+    @Autowired
+    public FilmController(FilmService filmService) {
+        this.filmService = filmService;
+    }
+
     @GetMapping
     public Collection<Film> findAll() {
-        log.info("Запрос на получение всех фильмов. Всего фильмов: {}", films.size());
-        return films.values();
+        log.info("Запрос на получение всех фильмов");
+        return filmService.findAll();
     }
 
-    //Post - для добавления фильма
+    @GetMapping("/{id}")
+    public Film getFilm(@PathVariable Long id) {
+        log.info("Получение фильма с id={}", id);
+        return filmService.getById(id);
+    }
+
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public Film create(@Valid @RequestBody Film film) {
-        if (film.getDuration().isNegative()) {
-            throw new ValidationException("Продолжительность не может быть отрицательна");
-        }
-
-        film.setId(getNextId());
-        films.put(film.getId(), film);
-        log.info("Добавлен новый фильм: {}", film);
-        return film;
+        log.info("Запрос на создание нового фильма: {}", film);
+        return filmService.create(film);
     }
 
-    //Put - обновление фильма
     @PutMapping
-    public Film update(@Valid @RequestBody Film newFilm) {
-        log.info("Запрос на обновление фильма с id={}", newFilm.getId());
-        Film oldFilm = films.get(newFilm.getId());
-
-        if (oldFilm == null) {
-            log.warn("Фильм с указанным id не найден: {}", newFilm.getId());
-            throw new ResourceNotFoundException("Фильм с указанным id не найден: " + newFilm.getId());
-        }
-
-        // Обновление полей
-        if (newFilm.getName() != null) {
-            oldFilm.setName(newFilm.getName());
-            log.info("Обновлено название фильма с id={}: {}", newFilm.getId(), newFilm.getName());
-        }
-
-        // Валидация обновленных полей
-        validateFilm(newFilm);
-
-        if (newFilm.getReleaseDate() != null) {
-            oldFilm.setReleaseDate(newFilm.getReleaseDate());
-        }
-
-        if (newFilm.getDuration() != null) {
-            if (newFilm.getDuration().isNegative()) {
-                throw new ValidationException("Продолжительность не может быть отрицательна");
-            }
-            oldFilm.setDuration(newFilm.getDuration());
-        }
-
-        if (newFilm.getDescription() != null) {
-            oldFilm.setDescription(newFilm.getDescription());
-            log.info("Обновлено описание фильма с id={}: {}", newFilm.getId(), newFilm.getDescription());
-        }
-
-        return oldFilm;
+    public Film update(@Valid @RequestBody Film film) {
+        log.info("Запрос на обновление фильма с id={}", film.getId());
+        return filmService.update(film);
     }
 
-    // валидация фильма
-    private void validateFilm(Film film) {
-        if (film.getReleaseDate() == null) {
-            log.warn("Дата релиза фильма не может быть пуста: {}", film);
-            throw new ValidationException("Нужно указать дату релиза фильма");
-        }
-
-        if (film.getDuration() == null) {
-            log.warn("Продолжительность фильма не может быть пуста: {}", film);
-            throw new ValidationException("Необходимо указать продолжительность фильма");
-        } else if (film.getDuration().isNegative()) {
-            log.warn("Продолжительность фильма не может быть отрицательным числом: {}", film);
-            throw new ValidationException("Продолжительность фильма не может быть отрицательным числом");
-        }
+    @PutMapping("/{id}/like/{userId}")
+    public void addLike(@PathVariable Long id, @PathVariable Long userId) {
+        log.info("Запрос на добавление лайка фильму id={} от пользователя id={}", id, userId);
+        filmService.addLike(id, userId);
     }
 
-    private long getNextId() {
-        return films.keySet()
-                .stream()
-                .mapToLong(id -> id)
-                .max()
-                .orElse(0) + 1;
+    @DeleteMapping("/{id}/like/{userId}")
+    public void removeLike(@PathVariable Long id, @PathVariable Long userId) {
+        log.info("Запрос на удаление лайка у фильма id={} от пользователя id={}", id, userId);
+        filmService.removeLike(id, userId);
+    }
+
+    @GetMapping("/popular")
+    public List<Film> getPopularFilms(
+            @RequestParam(defaultValue = "10") @Min(1) Integer count) {
+        log.info("Запрос на получение {} самых популярных фильмов", count);
+        return filmService.getPopularFilms(count);
     }
 }

@@ -1,90 +1,82 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.DuplicatedDataException;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 @RestController
 @RequestMapping("/users")
 @Slf4j
 public class UserController {
-    private final Map<Long, User> users = new HashMap<>();
-    private final Map<String, User> usersByEmail = new HashMap<>();
-    private long nextId = 1;
+    private final UserService userService;
 
-    //Get - получение списка всех пользователей
+    @Autowired
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
+
     @GetMapping
     public Collection<User> findAll() {
-        log.info("Получение списка всех пользователей");
-        return users.values();
+        log.info("Запрос на получение всех пользователей");
+        return userService.findAll();
     }
 
-    //Post - создание пользователя
+    @GetMapping("/{id}")
+    public User getUser(@PathVariable Long id) {
+        log.info("Получение пользователя с id={}", id);
+        return userService.getById(id);
+    }
+
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public User create(@Valid @RequestBody User user) {
-        log.info("Создание пользователя с email: {}", user.getEmail());
-
-        if (usersByEmail.containsKey(user.getEmail())) {
-            log.error("Ошибка при создании пользователя: email {} уже используется", user.getEmail());
-            throw new DuplicatedDataException("Этот имейл уже используется");
+        log.info("Запрос на создание пользователя: {}", user);
+        if (user.getLogin().contains(" ")) {
+            throw new ValidationException("Логин не может содержать пробелов");
         }
-        if (user.getName() == null || user.getName().isEmpty()) {
-            user.setName(user.getLogin());
-        }
-
-        // Установка ID
-        user.setId(getNextId());
-
-        // Сохранение пользователя
-        users.put(user.getId(), user);
-        usersByEmail.put(user.getEmail(), user);
-
-        log.info("Пользователь с id {} успешно создан", user.getId());
-        return user;
+        return userService.create(user);
     }
 
-    //Put - обновление пользователя
     @PutMapping
-    public User update(@Valid @RequestBody User newUser) {
-        log.info("Обновление пользователя с id: {}", newUser.getId());
-
-        User oldUser = users.get(newUser.getId());
-        if (oldUser == null) {
-            log.error("Ошибка при обновлении пользователя: пользователь с id = {} не найден", newUser.getId());
-            throw new NotFoundException("Пользователь с id = " + newUser.getId() + " не найден");
-        }
-
-        if (newUser.getEmail() != null && !newUser.getEmail().equals(oldUser.getEmail())) {
-            if (usersByEmail.containsKey(newUser.getEmail())) {
-                log.error("Ошибка при обновлении пользователя: email {} уже используется", newUser.getEmail());
-                throw new DuplicatedDataException("Этот имейл уже используется");
-            }
-            usersByEmail.remove(oldUser.getEmail());
-            oldUser.setEmail(newUser.getEmail());
-            usersByEmail.put(newUser.getEmail(), oldUser);
-        }
-        if (newUser.getName() != null) {
-            oldUser.setName(newUser.getName());
-        }
-        if (newUser.getLogin() != null) {
-            oldUser.setLogin(newUser.getLogin());
-        }
-        if (newUser.getBirthday() != null) {
-            oldUser.setBirthday(newUser.getBirthday());
-        }
-
-        log.info("Пользователь с id {} успешно обновлен", oldUser.getId());
-        return oldUser;
+    public ResponseEntity<User> updateUser(@Valid @RequestBody User user) {
+        User updatedUser = userService.update(user);
+        return ResponseEntity.ok(updatedUser);
     }
 
-    private long getNextId() {
-        return nextId++;
+    @PutMapping("/{id}/friends/{friendId}")
+    public void addFriend(@PathVariable Long id, @PathVariable Long friendId) {
+        log.info("Запрос на добавление в друзья: пользователь {} добавляет пользователя {}", id, friendId);
+        userService.addFriend(id, friendId);
+    }
+
+    @DeleteMapping("/{userId}/friends/{friendId}")
+    public ResponseEntity<Void> removeFriend(
+            @PathVariable Long userId,
+            @PathVariable Long friendId) {
+        userService.removeFriend(userId, friendId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{userId}/friends")
+    public ResponseEntity<List<User>> getFriends(@PathVariable Long userId) {
+        List<User> friends = userService.getFriends(userId);
+        return ResponseEntity.ok(friends);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public List<User> getCommonFriends(
+            @PathVariable Long id,
+            @PathVariable Long otherId) {
+        log.info("Запрос на получение общих друзей пользователей {} и {}", id, otherId);
+        return userService.getCommonFriends(id, otherId);
     }
 }

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 import ru.yandex.practicum.filmorate.annotation.ValidReleaseDate;
 
 import java.time.Duration;
@@ -13,6 +14,7 @@ import java.time.LocalDate;
 @Data
 public class Film {
 
+    @Getter
     private Long id;
 
     @NotBlank
@@ -45,4 +47,5 @@ public class Film {
     public void setDurationSeconds(long seconds) {
         this.duration = Duration.ofSeconds(seconds);
     }
+
 }
